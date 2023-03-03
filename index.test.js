@@ -1,6 +1,6 @@
 const {sequelize} = require('./db');
 const {Board, Cheese, User} = require('./models/Index');
-
+const seedCheese = require('./seedData')
 describe('All models', () => {
 
     //Start off with a new table every time we run the file
@@ -27,7 +27,7 @@ describe('All models', () => {
         })
         expect(board.rating).toEqual(4.5)
     })
-    
+
     test('can create Cheese', async () => {
         let cheese = await Cheese.create({
             type: 'Mozzerella',
@@ -36,6 +36,28 @@ describe('All models', () => {
         expect(cheese.type).toEqual('Mozzerella')
     })
 
+    test('Boards can be added to a User', async () => {
+        const foundUser = await User.findOne({where: {name : 'Sonam Tsering'}})
+        const foundBoard = await Board.findOne({where: {rating: 4.5}})
+        await foundUser.addBoard(foundBoard)
+        const boards = await foundUser.getBoards()
+        expect(boards.length).toEqual(1)
+    })
 
+    test('Board can have many Cheese', async () => {
+        const cheeses = await Cheese.bulkCreate(seedCheese)
+        const foundBoard = await Board.findOne({where: {rating: 4.5}})
+        await foundBoard.addCheese(cheeses)
+        const boardCheeses = await foundBoard.getCheeses()
+        expect(boardCheeses.length).toEqual(3)
+    })
+    
+    test('cheese can be on many boards', async () => {
+        const foundCheese = await Cheese.findOne({where: {type: 'Mozzerella'}})
+        const foundBoard = await Board.findOne({where: {rating: 4.5}})
+        await foundCheese.addBoard(foundBoard)
+        const cheeseBoards = await foundCheese.getBoards()
+        expect(cheeseBoards.length).toEqual(1)
+    })
 
 })
