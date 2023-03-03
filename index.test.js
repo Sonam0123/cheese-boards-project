@@ -60,4 +60,16 @@ describe('All models', () => {
         expect(cheeseBoards.length).toEqual(1)
     })
 
+
+    test('A board can be loaded with its cheeses', async () => {
+        const foundBoard = await Board.findOne({where: {rating: 4.5}, include: Cheese})
+        expect(foundBoard.cheeses.length).toEqual(3)
+    })
+
+    test('A user can be loaded with its boards', async () => {
+        const foundUser = await User.findOne({where: {name : 'Sonam Tsering'}, include: Board})
+        expect(foundUser.boards.length).toEqual(1)
+    })
+
+
 })
